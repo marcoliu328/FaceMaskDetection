@@ -27,8 +27,6 @@ DIRECTORY = r'/Users/marcoliu/Desktop/Github/FaceMaskDetection/dataset'
 print(DIRECTORY)
 RESULTS = ["Masked", "Unmasked"]
 
-print("--- Loading images into data structures ---")
-
 data = [] #the image dataset
 labels = [] #the ground truth values (masked or unmasked)
 
@@ -58,4 +56,36 @@ data = np.array(data, dtype="float32")
 #split data into test and training
 (trainX, testX, trainY, testY) = train_test_split(data, labels, test_size=0.20, stratify=labels, random_state = 1)
 
+
+#increase the data set by using ImageDataGenerator for data augmentation
+augment = ImageDataGenerator(rotation_range=20, zoom_range=0.15, width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15, horizontal_flip=True,fill_mode="nearest")
+
+
+#import the base model MobileNetV2 while excluding the top fully connected layers to prepare for fine tuning
+#images are of shape 224px224x3 (RGB)
+mobile = MobileNetV2(include_top=False, input_tensor=Input(shape=(224,224,3)))
+
+
+#construct the rest of model, this is a functional model, not sequential
+#second paramter is to indicate the "previous" parts of the model
+top = mobile.output
+top = AveragePooling2D(pool_size=(7,7))(top) #add pooling layer
+top = Flatten(name="Flatten")(top) #flatten for fc
+top = Dense(128, activation="relu")(top) #use relu for non-linear use cases
+top = Dropout(0.5)(top) #drops some neurons at random to prevent overfitting
+top = Dense(2, activation="softmax")(top) #can use sigmoid as well since we have only 2 output classes
+
+
+#construct the full model
+model = Model(inputs=mobile.input, outputs=top)
+
+
+#freeze the layers from mobilenets since we dont need to train them
+for layer in mobile.layers:
+    layer.trainable = False
+
+
+#compile model
+opt = Adam(lr=INITIAL_LEARNING_RATE, decay=INITIAL_LEARNING_RATE/EPOCHS)
+model.compile(loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"])
 
