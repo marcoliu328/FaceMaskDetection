@@ -89,3 +89,37 @@ for layer in mobile.layers:
 opt = Adam(lr=INITIAL_LEARNING_RATE, decay=INITIAL_LEARNING_RATE/EPOCHS)
 model.compile(loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"])
 
+
+#train the head of the model
+H = model.fit(augment.flow(trainX, trainY, batch_size=BATCH_SIZE), steps_per_epoch=len(trainX) // BATCH_SIZE, validation_data=(testX, testY), validation_steps=len(testX) // BATCH_SIZE, epochs=EPOCHS)
+
+
+#make predictions
+predictions = model.predict(testX, batch_size=BATCH_SIZE)
+predictions = np.argmax(predictions, axis = 1)
+
+
+#print training report
+print(classification_report(y_true=testY.argmax(axis=1), y_pred=predictions, target_names=lb.classes_))
+
+
+#save the model
+model.save("face_mask_detection_model", save_format="h5")
+
+
+#Use matplotlib to visual accuracy
+#Graph loss/accuracy versus epoch #
+plt.style.use("ggplot")
+plt.figure()
+plt.title("Training Loss and Accuracy")
+plt.xlabel("Epoch #")
+plt.ylabel("Loss/Accuracy")
+plt.legend(loc="lower left")
+plt.plot(np.arange(0, EPOCHS), H.history["loss"], label="train_loss")
+plt.plot(np.arange(0, EPOCHS), H.history["val_loss"], label="val_loss")
+plt.plot(np.arange(0, EPOCHS), H.history["accuracy"], label="train_acc")
+plt.plot(np.arange(0, EPOCHS), H.history["val_accuracy"], label="val_acc")
+plt.savefig(("plot.png"))
+
+
+
