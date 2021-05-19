@@ -111,14 +111,14 @@ model.save("face_mask_detection_model", save_format="h5")
 #Graph loss/accuracy versus epoch #
 plt.style.use("ggplot")
 plt.figure()
-plt.title("Training Loss and Accuracy")
-plt.xlabel("Epoch #")
-plt.ylabel("Loss/Accuracy")
-plt.legend(loc="lower left")
 plt.plot(np.arange(0, EPOCHS), H.history["loss"], label="train_loss")
 plt.plot(np.arange(0, EPOCHS), H.history["val_loss"], label="val_loss")
 plt.plot(np.arange(0, EPOCHS), H.history["accuracy"], label="train_acc")
 plt.plot(np.arange(0, EPOCHS), H.history["val_accuracy"], label="val_acc")
+plt.title("Training Loss and Accuracy")
+plt.xlabel("Epoch #")
+plt.ylabel("Loss/Accuracy")
+plt.legend(loc="lower left")
 plt.savefig(("plot.png"))
 
 
