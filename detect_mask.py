@@ -58,23 +58,25 @@ def detect_and_predict(frame, faceNet, maskNet):
     #return the location of the face, and prediction (percentage)
     return (locs, preds)
 
+"""
 #load face_detector model (architecture definition and weights)
-definitionPath = r"/Users/marcoliu/Desktop/Github/FaceMaskDetection/face_detector/deploy.prototxt"
-weightsPath = r"/Users/marcoliu/Desktop/Github/FaceMaskDetection/face_detector/res10_300x300_ssd_iter_140000.caffemodel"
+definitionPath = r"face_detector/deploy.prototxt"
+weightsPath = r"face_detector/res10_300x300_ssd_iter_140000.caffemodel"
 faceModel = cv2.dnn.readNet(definitionPath, weightsPath)
 
 #load our mask_detector model from training
-maskModel = load_model("/Users/marcoliu/Desktop/GitHub/FaceMaskDetection/face_mask_detection_model")
+maskModel = load_model("face_mask_detection_model")
 
 #start the video stream
-vs = VideoStream(src=0).start()
+vs = VideoStream(src=0, resolution=(640,480)).start()
+
 
 #loop over frames of videoStream and evaluate
 while True:
     
-    #grab frame from video and resize to width of 400p
+    #grab frame from video and resize to width of 800p
     frame = vs.read()
-    frame = imutils.resize(frame, width=400)
+    frame = imutils.resize(frame, width=800)
 
     #send frame and both models for prediction
     (locs,preds) = detect_and_predict(frame, faceModel, maskModel)
@@ -111,3 +113,4 @@ while True:
 #clean up
 cv2.destroyAllWindows()
 vs.stop()
+"""
