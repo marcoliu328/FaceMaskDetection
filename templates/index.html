@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>face_detection</title>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/mainpage.css') }}">
+    <!-- <link rel= "stylesheet" type= "text/css" href= "mainpage.css"> -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,600&family=Ubuntu:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>face_detection by Marco Liu</header>
+    <div class="image-container" style="justify-content : center; display : flex;">
+        <!--<img src='placeholder.jpg' style="border-radius: 30px;">-->
+        <img src="{{ url_for('video_feed') }}" style="border-radius: 30px;">
+    </div>
+    <form method="POST" action="{{ url_for('requests')}}">
+        <div class="buttons-container">
+            <div class="buttons-container2">
+                <h2 class="buttonLabel">Try it out!</h2>
+                <button class="buttons" type ="submit" name="start" value="Start">start</button>
+                <button class="buttons" type="submit" name="stop" value = "Stop">stop</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        var socket = io();
+        socket.on('connect', function() {
+            console.log('connected to web sockets')
+        });
+
+        socket.on('disconnect', function() {
+            console.log('disconnect to web sockets')
+        });
+    </script>
+</body>
+</html>
