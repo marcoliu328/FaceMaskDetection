@@ -12,8 +12,13 @@ header {
     color : rgb(236, 222, 195);
 }
 
+.video {
+    border : 3px solid #000;
+}
+
 .image-container {
     height: 70vh;
+    background-image : url("../images/placeholder.jpg");
 }
 
 .buttons-container{

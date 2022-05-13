@@ -1,7 +1,6 @@
 try:
     from numpy import broadcast
     from flask import Flask, render_template, Response, request
-    from tensorflow.keras.preprocessing.image import load_img
     from tensorflow.keras.models import load_model
     from flask_socketio import SocketIO
     from flask_socketio import emit
@@ -15,15 +14,10 @@ try:
 except Exception as e:
     print("Missing Module: {}".format(e))
 
-switch = 0
+switch = 1
 app = Flask(__name__)
 socketio = SocketIO(app)
-camera = None
-
-# load our placeholder image for when camera is not being used
-placeholder_image=load_img('static/images/placeholder.jpg')
-placeholder = (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + placeholder_image.tobytes() + b'\r\n')
+camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 #load face_detector model (architecture definition and weights)
 definitionPath = r"face_detector/deploy.prototxt"
@@ -35,10 +29,7 @@ maskModel = load_model("face_mask_detection_model")
 
 def gen():
     while True:
-        if switch == 0 or camera is None:
-            yield placeholder
-            """
-        else:
+        if switch == 1 and camera is not None:
             success, frame = camera.read()
             if success:
                 frame = imutils.resize(frame, width = 640, height = 480)
@@ -69,8 +60,12 @@ def gen():
                 success, jpg = cv2.imencode('.jpg', frame)
                 yield (b'--frame\r\n'
                         b'Content-Type: image/jpeg\r\n\r\n' + jpg.tobytes() + b'\r\n')
-            else:
-                yield placeholder"""
+
+            else: 
+                break
+        
+        else: 
+            break
 
 @socketio.on('connect')
 def connect():
@@ -92,6 +87,7 @@ def disconnect():
         switch = 0
     except Exception as e:
         print("did not disconnect", file=sys.stderr)
+        print(e)
         pass
         
 @app.route('/')
@@ -115,6 +111,7 @@ def requests():
                 camera.release()
                 cv2.destroyAllWindows()
                 switch = 0
+                camera = None
                 print("stopping")
             except Exception as e:
                 print(e)
@@ -123,11 +120,11 @@ def requests():
 
 
     elif request.method == "GET":
-        return render_template('index.html')
+        return render_template('index.html', data=switch)
 
-    return render_template('index.html')
+    return render_template('index.html', data=switch)
 
 
-#app.run(host="0.0.0.0", port=8080)
 if __name__ == '__main__':
     socketio.run(app)
+    #app.run(host="0.0.0.0", port=8080)
