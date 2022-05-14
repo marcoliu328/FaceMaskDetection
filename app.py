@@ -14,10 +14,10 @@ try:
 except Exception as e:
     print("Missing Module: {}".format(e))
 
-switch = 1
+switch = 0
 app = Flask(__name__)
 socketio = SocketIO(app)
-camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+camera = None
 
 #load face_detector model (architecture definition and weights)
 definitionPath = r"face_detector/deploy.prototxt"
@@ -70,21 +70,21 @@ def gen():
 @socketio.on('connect')
 def connect():
     try:
-        file = open("counter.txt", "r")
-        data = file.read()
-        new = {"counter": int(json.loads(data).get("counter")) + 1}
-        emit('user', new, broadcast=True)
         print("connected", file=sys.stderr)
     except Exception as e:
         print("connect socket failed", file=sys.stderr)
+        print(e)
 
 @socketio.on('disconnect')
 def disconnect():
     global switch, camera
     try:
         print("disconnected", file=sys.stderr)
-        camera.release()
-        switch = 0
+        if switch == 1:
+            camera.release()
+            cv2.destroyAllWindows()
+            switch = 0
+            camera = None
     except Exception as e:
         print("did not disconnect", file=sys.stderr)
         print(e)
