@@ -1,6 +1,6 @@
 try:
     from numpy import broadcast
-    from flask import Flask, render_template, Response, request
+    from flask import Flask, render_template, Response, request, jsonify
     from tensorflow.keras.models import load_model
     from flask_socketio import SocketIO
     from flask_socketio import emit
@@ -69,8 +69,12 @@ def gen():
 
 @socketio.on('connect')
 def connect():
+    global switch, camera
     try:
         print("connected", file=sys.stderr)
+        #if not camera:
+        #    camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
     except Exception as e:
         print("connect socket failed", file=sys.stderr)
         print(e)
@@ -80,7 +84,7 @@ def disconnect():
     global switch, camera
     try:
         print("disconnected", file=sys.stderr)
-        if switch == 1:
+        if camera:
             camera.release()
             cv2.destroyAllWindows()
             switch = 0
@@ -98,15 +102,16 @@ def index():
 def video_feed():
     return Response(gen(), mimetype = "multipart/x-mixed-replace; boundary=frame")
 
-@app.route('/requests', methods = ['POST', 'GET'])
+@app.route('/requests', methods = ['POST'])
 def requests():
     global switch, camera
+    print(request.form)
     if request.method == 'POST':
-        if "start" in request.form and switch == 0:
+        if request.form['request'] == "start" and switch == 0:
             camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             switch = 1
             print("starting")
-        elif "stop" in request.form and switch == 1:
+        elif request.form['request'] == "stop" and switch == 1:
             try:
                 camera.release()
                 cv2.destroyAllWindows()
@@ -119,10 +124,7 @@ def requests():
         print(switch)
 
 
-    elif request.method == "GET":
-        return render_template('index.html', data=switch)
-
-    return render_template('index.html', data=switch)
+    return jsonify({'switch' : switch})
 
 
 if __name__ == '__main__':
