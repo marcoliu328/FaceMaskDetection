@@ -33,9 +33,15 @@ $(document).ready(function() {
             d = new Date();
             if (data.switch == 1) {
                 $('img').attr("src", videoRoute+"?"+d.getTime());
+                $('img').css({
+                    'box-shadow' : '0px 4px 10px #000000'
+                })
             }
             else {
-                $('img').attr("src", "static/images/placeholder.jpg?"+d.getTime());
+                $('img').attr("src", "static/images/facemaskicon.png");
+                $('img').css({
+                    'box-shadow' : '0px 0px 0px #000000'
+                })
             }
         });
         event.preventDefault();
